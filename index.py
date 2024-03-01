@@ -79,7 +79,6 @@ for url in urls:
             root = html.fromstring(req.content)
 
 print("{} Urls found".format(len(products_urls)))
-import pdb;pdb.set_trace()
 for url in products_urls:
     req = requests.get(url)
     root = html.fromstring(req.content)
