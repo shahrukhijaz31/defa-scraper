@@ -1,28 +1,30 @@
 import requests
-import pymysql
+import mysql.connector
 
 from lxml import html
 
 
-# Example usage:
-host = 'localhost'
-user = 'root'
-password = ''
-database = 'defa_db'
+# # Example usage:
+# host = 'localhost'
+# user = 'root'
+# password = ''
+# database = 'defa_db'
 
-connection = pymysql.connect(
-    host=host,
-    user=user,
-    password=password,
-    database=database,
-    cursorclass=pymysql.cursors.DictCursor
+mydb = mysql.connector.connect(
+host = '174.138.66.224',
+user = 'gegvpzggpr',
+password = 'r2RRbH8MNB',
+database = 'gegvpzggpr',
+# port = "25060"
+
 )
+
 
 urls = [
     "https://www.defa.com/no/produkt-kategori/ladelosninger-elbil/",
-    # "https://www.defa.com/no/produkt-kategori/ladere-og-invertere/",
-    # "https://www.defa.com/no/produkt-kategori/bilalarm-sporing/",
-    # "https://www.defa.com/no/produkt-kategori/bilvarme/"
+    "https://www.defa.com/no/produkt-kategori/ladere-og-invertere/",
+    "https://www.defa.com/no/produkt-kategori/bilalarm-sporing/",
+    "https://www.defa.com/no/produkt-kategori/bilvarme/"
 ]
 
 products_urls = []
@@ -98,7 +100,7 @@ for url in products_urls:
 
     files = root.xpath("//div[@id='downloads']/div[@class='content']/a")
     attachements = []
-    cursor = connection.cursor()
+    mycursor = mydb.cursor()
 
     for file in files:
         source = file.xpath("@href")[0]
@@ -112,8 +114,8 @@ for url in products_urls:
 
         # INSERT INTO `defa_product_files`(`id`, `product_id`, `source`, `created_at`)
         insert_files_query = "INSERT INTO defa_product_files (`product_id`, `source`, `name`) VALUES ('%s', '%s', '%s')"
-        cursor.execute(insert_files_query  % (product_id, url, name))
-        connection.commit()
+        mycursor.execute(insert_files_query  % (product_id, url, name))
+        mydb.commit()
                               
     product_description = get_data_with_html_tags_using_xpath(
         root.xpath("//div[contains(@class,'desc product-section')]/div[@class='content']")
@@ -130,7 +132,7 @@ for url in products_urls:
         images = "{}, {}".format(images, image)
 
     insert_query = "INSERT INTO defa_product (title, price, introduction, product_id, main_category_2, main_category_3, main_category_4, main_category_5, main_category_6, specification, description, source_url, images) VALUES ('%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s', '%s')"
-    cursor.execute(insert_query  % (product_title, product_price, product_description, product_id, main_category_2, main_category_3, main_category_4, main_category_5, main_category_6, product_specification, product_description, url, images))
-    connection.commit()
+    mycursor.execute(insert_query  % (product_title, product_price, product_description, product_id, main_category_2, main_category_3, main_category_4, main_category_5, main_category_6, product_specification, product_description, url, images))
+    mydb.commit()
 
     print("{} -- Scraped".format(product_id))
