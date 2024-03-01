@@ -27,10 +27,7 @@ urls = [
     "https://www.defa.com/no/produkt-kategori/bilvarme/"
 ]
 
-products_urls = []
-req = requests.get(urls[0])
-root = html.fromstring(req.content)
-products_urls.extend(root.xpath("//ul[contains(@class, 'products')]/li/a/@href"))
+
 
 def return_if_exist(test_string):
     if len(test_string):
@@ -64,18 +61,25 @@ def download_file(url, local_filename):
     except requests.exceptions.RequestException as e:
         print(f"Error downloading the file: {e}")
 
-is_pagination = True
-while is_pagination:
-
+#----------ahmad change-----------------------------------
+products_urls = []
+for url in urls:
+    req = requests.get(url)
+    root = html.fromstring(req.content)
     products_urls.extend(root.xpath("//ul[contains(@class, 'products')]/li/a/@href"))
-    is_pagination = root.xpath("//ul[@class='page-numbers']/li[last()]/a/@href")
-    if len(is_pagination):
-        is_pagination = is_pagination[0]
-        req = requests.get(is_pagination)
-        root = html.fromstring(req.content)
+
+    is_pagination = True
+    while is_pagination:
+
+        products_urls.extend(root.xpath("//ul[contains(@class, 'products')]/li/a/@href"))
+        is_pagination = root.xpath("//ul[@class='page-numbers']/li[last()]/a/@href")
+        if len(is_pagination):
+            is_pagination = is_pagination[0]
+            req = requests.get(is_pagination)
+            root = html.fromstring(req.content)
 
 print("{} Urls found".format(len(products_urls)))
-
+import pdb;pdb.set_trace()
 for url in products_urls:
     req = requests.get(url)
     root = html.fromstring(req.content)
